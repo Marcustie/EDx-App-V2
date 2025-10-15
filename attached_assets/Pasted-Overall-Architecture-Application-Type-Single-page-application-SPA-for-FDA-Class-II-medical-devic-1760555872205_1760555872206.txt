@@ -1,0 +1,351 @@
+Overall Architecture
+Application Type: Single-page application (SPA) for FDA Class II medical device control
+Stack: React + TypeScript with Vite, Wouter routing, shadcn/ui components, Tailwind CSS
+Theme: Light/dark mode toggle with professional medical device aesthetic
+
+Global Layout Structure
+┌─────────────────────────────────────────────────────┐
+│  [Sidebar - 280px]  │  [Main Content Area]          │
+│                     │                               │
+│  ┌──────────────┐   │  ┌─────────────────────────┐ │
+│  │ Logo/Header  │   │  │ Top Header Bar          │ │
+│  └──────────────┘   │  │ - Sidebar toggle        │ │
+│                     │  │ - Connection indicator  │ │
+│  Navigation:        │  │ - Theme toggle          │ │
+│  • Dashboard        │  └─────────────────────────┘ │
+│  • Instruments      │                               │
+│  • Scripts          │  ┌─────────────────────────┐ │
+│  • Runs             │  │ Status Bar (if needed)  │ │
+│  • Analysis         │  └─────────────────────────┘ │
+│  • LabGuru          │                               │
+│  • Audit Log        │  ┌─────────────────────────┐ │
+│                     │  │                         │ │
+│                     │  │  Page Content           │ │
+│                     │  │  (max-width: 1920px)    │ │
+│                     │  │                         │ │
+│                     │  └─────────────────────────┘ │
+└─────────────────────────────────────────────────────┘
+Sidebar (Collapsible: 280px → 64px icon-only)
+Header Section (p-6, border-bottom):
+Logo: Blue square (40x40px) with Activity icon
+Title: "ElectraDx" (font-semibold, 16px)
+Subtitle: "XP2 Control" (font-mono, 12px, muted-foreground)
+Navigation Menu:
+Dashboard (LayoutDashboard icon)
+Instruments (Activity icon)
+Scripts (FileCode icon)
+Runs (GitBranch icon)
+Analysis (FlaskConical icon)
+LabGuru (BookOpen icon)
+Audit Log (FileSpreadsheet icon)
+Active state highlighted with background color
+Icons: 16x16px, lucide-react
+Top Header Bar (p-4, border-bottom)
+Left: Sidebar toggle button (hamburger menu)
+Right:
+Connection Indicator:
+Green dot + "Connected" when WebSocket is connected
+Red pulsing dot + "Disconnected" when offline
+Theme Toggle: Moon/Sun icon button
+Status Bar (Conditional - only shown when disconnected)
+Amber alert banner below header
+Shows: "Reconnecting… (N/∞)" with spinning refresh icon
+No toast notifications - this is the single source of UX feedback
+Main Content Area (p-6, max-width: 1920px, mx-auto)
+Scrollable content area
+White background (light mode) / dark gray (dark mode)
+Page-Specific Layouts
+1. Dashboard Page (/)
+Header:
+
+H1: "Dashboard" (text-3xl, font-bold)
+Subtitle: "Monitor and control your XP2 instruments"
+Stats Grid (4 columns on large screens):
+
+┌──────────────┬──────────────┬──────────────┬──────────────┐
+│ Total        │ Online       │ Active Runs  │ Scripts      │
+│ Devices      │              │              │              │
+│   [number]   │   [number]   │   [number]   │   [number]   │
+│ (icon)       │ (green dot)  │ (icon)       │ (icon)       │
+└──────────────┴──────────────┴──────────────┴──────────────┘
+Each card shows:
+
+Small icon/indicator (top-right)
+Label (small, muted text)
+Large number (2xl, bold)
+Experiment Builder Section:
+
+Collapsible card for creating new experiments
+Metadata key-value editor
+LabGuru integration form
+Device Grid (Responsive: 1 → 2 → 3 → 4 columns):
+
+Shows 8 most recent devices
+Each device card contains:
+Device name + status badge
+Device ID (monospace font)
+Mini temperature chart
+Last seen timestamp
+Click to navigate to device detail
+Empty/Loading States:
+
+Skeleton loaders: Animated pulse cards
+Empty state: Icon + "No Devices Found" message
+Error state: Red border card with AlertCircle icon
+2. Instruments Page (/instruments)
+Search & Filters:
+
+Search input (top-left)
+Status filter dropdown: All, Online, Offline, Running
+Sort options: Name, Status, Last Seen
+Device Grid (Same as dashboard but shows ALL devices):
+
+Responsive grid: 1 → 2 → 3 → 4 columns
+DeviceCard component for each instrument
+3. Device Detail Page (/instruments/:id)
+Header:
+
+Back button (← arrow) to instruments list
+Device name (H1)
+Status badge (colored pill: green=online, blue=running, gray=offline, red=error)
+Device ID (monospace, muted)
+Tabbed Interface:
+
+Tab 1: Overview
+
+Left Column (Controls):
+
+Run Controls panel:
+START button (green, large)
+STOP button (red, large)
+PAUSE button (amber)
+All buttons show loading spinners when operation in-flight
+Buttons locked during operations (idempotent UI)
+Current Metrics card:
+Temperature: [value]°C (with Thermometer icon)
+Magnet Position: [value]mm (with MoveVertical icon)
+Fluid Detected: Yes/No
+Temperature Control:
+Number input with +/- steppers
+SET TEMP button
+Right Column (Telemetry):
+
+Live Chronoamperometry Chart (h-80):
+X-axis: Time (seconds)
+Y-axis: Current (μA)
+Updates at 10Hz
+Last 300 data points (30 seconds @ 10Hz)
+Recharts with smooth transitions
+Live Temperature Chart (h-48):
+X-axis: Time
+Y-axis: Temperature (°C)
+Color: Green line
+Tab 2: Script
+
+Script uploader component:
+Drag-drop zone
+File selection button
+Progress bars showing chunk upload (80 KiB chunks)
+Gzip compression indicator
+Script viewer:
+Code editor appearance
+Syntax highlighting
+Line numbers (monospace)
+Current line highlighted during execution
+Tab 3: Metadata
+
+Tag editor (key-value pairs)
+Add/remove metadata fields
+Type-specific inputs
+Validation messages
+Tab 4: LabGuru
+
+LabGuru integration form
+Sync experiment data to ELN
+Field mapping interface
+4. Scripts Page (/scripts)
+Layout:
+
+Table with columns:
+Script Name (with FileCode icon)
+Size (KB, monospace)
+Uploaded (timestamp, monospace ISO 8601)
+Actions (View, Download, Delete buttons)
+Sortable columns
+Sticky header
+Pagination: 50 rows per page
+Upload Section:
+
+Drag-drop area at top
+Shows progress for multi-chunk uploads
+Success/error toast notifications
+5. Runs Page (/runs)
+Filters (Top bar):
+
+Device filter (dropdown)
+Status filter: All, Running, Completed, Error, Cancelled
+Date range picker
+Search by Run ID
+Runs Table:
+
+Columns:
+Run ID (monospace, blue link)
+Device Name
+Status (colored badge)
+Start Time (ISO 8601, monospace)
+Duration
+Script Name
+Actions (View, Stop buttons)
+Striped rows
+Sortable columns
+Click row to open run details
+Run Detail View (Modal or full page):
+
+Run metadata
+Event timeline
+Telemetry charts
+Analysis results link
+6. Analysis Page (/analysis)
+Layout:
+
+Grid of analysis cards
+Each card shows:
+Run ID
+Analysis type
+Timestamp
+Generated plots (PNG/SVG embedded)
+Download button
+Full-Screen Analysis Viewer:
+
+Overlay modal
+Close button (top-right)
+Scrollable content
+High-resolution plots
+Export options
+7. LabGuru Page (/labguru)
+Three Sub-Pages:
+
+/labguru (Main):
+
+Integration status card
+Recent sync history
+Configure connection button
+/labguru/compose:
+
+Form to create new ELN entry
+Field mapping from run metadata
+Submit button
+/labguru/history:
+
+Table of synced experiments
+Timestamp, Run ID, ELN ID columns
+View in LabGuru link (external)
+8. Audit Log Page (/audit)
+Filters:
+
+Date range picker
+User filter (dropdown)
+Action type filter: All, Run Start, Run Stop, Script Upload, etc.
+Search by Run ID or User
+Audit Table:
+
+Columns:
+Timestamp (ISO 8601, monospace, sortable)
+Action (colored badge: green=start, red=stop, blue=upload)
+User (avatar + name)
+Device/Run ID
+Signature Hash (truncated, monospace, copy button)
+Infinite scroll or pagination
+Immutable records (no edit/delete)
+Electronic Signature Modal:
+
+Shows action being signed
+Password re-entry field
+HMAC-SHA256 hash preview
+Confirm button (2s delay to prevent accidental clicks)
+Cancel button
+9. Dev Run Harness (/dev/run-harness)
+Developer tool for testing run state machine
+Manual command inputs
+WebSocket message log
+State transition visualization
+Design System Details
+Colors (HSL values in CSS variables)
+Light Mode:
+
+Background: 0 0% 100% (white)
+Card/Surface: 240 5% 96% (light gray)
+Primary: 217 91% 60% (professional blue)
+Success/Online: 142 71% 45% (green)
+Warning/Paused: 38 92% 50% (amber)
+Error/Offline: 0 84% 60% (red)
+Text Primary: 240 10% 4%
+Text Secondary: 240 4% 46%
+Dark Mode: Automatically adapts via CSS variables
+
+Typography:
+Primary Font: Inter (Google Fonts)
+Monospace Font: JetBrains Mono (for IDs, timestamps, code)
+Sizes:
+Page Headers: 32px (2rem), font-weight 700
+Section Headers: 24px (1.5rem), font-weight 600
+Card Titles: 18px (1.125rem), font-weight 600
+Body: 14px (0.875rem), font-weight 400
+Small/Caption: 12px (0.75rem)
+Metrics: 20px (1.25rem), font-weight 600, monospace
+Spacing:
+Component padding: p-6 (24px)
+Card gaps: gap-4 (16px)
+Section margins: my-8 (32px)
+Dense grids: gap-2 (8px)
+Status Badges (Rounded pills):
+Online: Green background, white text
+Running: Blue background, white text
+Offline: Gray background, darker gray text
+Error: Red background, white text
+Paused: Amber background, dark text
+Buttons:
+START: Green, large (min-h-10)
+STOP: Red, large
+PAUSE: Amber, large
+Default actions: Blue primary
+Secondary actions: Gray outline
+Icon-only: Square (h-9 w-9)
+Loading states: Spinner icon with text ("Starting...", "Stopping...")
+Charts (Recharts):
+Height: h-80 (320px) for primary, h-48 (192px) for secondary
+Line colors: chart-1 through chart-5 (5-color palette)
+Grid: Dotted gray lines
+Tooltips: Show timestamp + exact value on hover
+Smooth transitions: 100ms
+Auto-scaling Y-axis
+Animations:
+Minimal motion philosophy
+Chart updates: 100ms smooth transition
+Status changes: 200ms color fade
+Modals: 150ms fade-in
+Skeleton loaders: Subtle pulse
+NO decorative animations
+Responsive Breakpoints:
+Mobile (< 768px): Single column, collapsed sidebar
+Tablet (768-1024px): 2-column grids, sidebar overlay
+Desktop (1024-1920px): Full layouts, persistent sidebar
+Large monitors (> 1920px): Max-width container (1920px)
+Real-Time Features
+WebSocket Health System:
+Global context provider tracks connection state
+Exponential backoff retry: 250ms → 5000ms with jitter
+Retry counter increments on each attempt, resets on success
+StatusBar shows "Reconnecting… (N/∞)" banner when disconnected
+No toast spam for connection issues
+Live Telemetry:
+10Hz updates for chronoamperometry data
+Temperature/sensor data streamed via WebSocket
+Ring buffer: Last 300 messages (30 seconds)
+Smooth chart transitions
+Subscribe to specific device on mount
+Command Publishing:
+Idempotent UI locks using useRef for persistent keys
+Keys generated once per operation, cleared on ACK/NACK/TIMEOUT
+Buttons locked during in-flight operations
+Granular loading states: "Creating...", "Starting...", "Stopping..."
