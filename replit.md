@@ -101,15 +101,18 @@ Frontend (React) ←→ Backend (FastAPI) ←→ XP2 Devices (USB)
 - Event parsing (position, output, data, temperature, motor)
 
 **Frontend UI:**
-- **Enterprise Medical Device Interface** with Fluent Design principles
-- **Sidebar Navigation** (280px fixed, collapsible to 64px icon-only)
-- **Dashboard** with multi-device grid layout and real-time statistics cards
-- **Instruments Page** with professional device cards and status indicators
-- **Device Detail Page** with 2-column control panel layout:
+- **ElectraDx Medical Device Interface** following specification
+- **Top Header Bar**: Sidebar toggle, connection indicator (green/red dot), theme toggle
+- **Sidebar Navigation**: ElectraDx branding (blue square logo + Activity icon), 280px fixed width, collapsible to 64px icon-only
+- **Navigation Menu**: Dashboard, Instruments, Scripts, Runs, Analysis, LabGuru, Audit Log
+- **Status Bar**: Amber alert showing "Reconnecting... (N/∞)" when disconnected
+- **Dashboard**: Stats cards + Experiment Builder + device grid (max 8 devices shown)
+- **Instruments Page**: Professional device cards with search and status indicators
+- **Device Detail Page**: 2-column control panel layout:
   - Control tab: Controls (left) + Telemetry (right) + Full-width live chart
   - Script tab: Lua editor with line highlighting and execution controls
   - Info tab: Device information and connection status
-- **Scripts Page** (placeholder UI)
+- **Placeholder Pages**: Runs, Analysis, LabGuru (ELN integration), Audit Log
 - **Dark/Light Mode** theme toggle with HSL-based color system
 - **Responsive Design** (mobile to desktop breakpoints)
 - **Real-time WebSocket** integration with ref-based event processing
@@ -344,18 +347,21 @@ No specific user preferences have been configured yet. As development continues,
 - ✅ Frontend running on port 5000
 - ✅ Fixed CORS settings for Replit proxy
 
-**Enterprise UI Redesign:**
+**ElectraDx UI Implementation:**
 - ✅ Implemented HSL-based color system with medical device aesthetics
 - ✅ Added Inter and JetBrains Mono fonts from Google Fonts
-- ✅ Created Sidebar component (280px fixed, collapsible to 64px)
-- ✅ Rebuilt App.tsx with sidebar navigation layout
-- ✅ Redesigned Dashboard with multi-device grid and stats cards
-- ✅ Updated DeviceCard with status indicators and professional badges
-- ✅ Enhanced DataChart with proper sizing (h-80) and grid styling
+- ✅ Created TopHeaderBar with sidebar toggle, connection indicator, and theme toggle
+- ✅ Created StatusBar component for reconnection alerts
+- ✅ Updated Sidebar with ElectraDx branding (blue square logo + Activity icon)
+- ✅ Added full navigation menu (Dashboard, Instruments, Scripts, Runs, Analysis, LabGuru, Audit Log)
+- ✅ Rebuilt App.tsx with top header + sidebar layout structure
+- ✅ Updated Dashboard with Experiment Builder section
+- ✅ Created placeholder pages for Runs, Analysis, LabGuru, and Audit Log
+- ✅ Enhanced DeviceCard with status indicators and professional badges
+- ✅ Updated DataChart with proper sizing (h-80) and grid styling
 - ✅ Updated ScriptEditor with JetBrains Mono and line highlighting
-- ✅ Rebuilt Instruments page with enterprise card design
 - ✅ Rebuilt DeviceDetail with 2-column control panel layout
-- ✅ Fixed nested anchor tag issues in navigation
+- ✅ Fixed all nested interactive element issues
 - ✅ Created comprehensive documentation
 
 ### Next Steps
