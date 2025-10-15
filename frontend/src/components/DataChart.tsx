@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { DataPoint } from '@/types';
+import type { DataPoint } from '@/types';
 
 interface DataChartProps {
   data: DataPoint[];

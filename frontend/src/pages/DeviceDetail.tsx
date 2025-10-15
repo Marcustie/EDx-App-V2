@@ -8,7 +8,7 @@ import { DataChart } from '@/components/DataChart';
 import { ScriptEditor } from '@/components/ScriptEditor';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { api } from '@/services/api';
-import { DataPoint } from '@/types';
+import type { DataPoint } from '@/types';
 import { Play, Square, Upload, Thermometer, Activity } from 'lucide-react';
 
 export function DeviceDetail() {

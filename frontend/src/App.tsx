@@ -33,8 +33,8 @@ function App() {
                 const Icon = item.icon;
                 return (
                   <Link key={item.href} href={item.href}>
-                    <a
-                      className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary ${
+                    <span
+                      className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary cursor-pointer ${
                         isActive(item.href)
                           ? 'text-foreground'
                           : 'text-muted-foreground'
@@ -42,7 +42,7 @@ function App() {
                     >
                       <Icon className="h-4 w-4" />
                       {item.label}
-                    </a>
+                    </span>
                   </Link>
                 );
               })}

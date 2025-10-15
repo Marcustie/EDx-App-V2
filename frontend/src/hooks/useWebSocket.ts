@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { WebSocketEvent } from '@/types';
+import type { WebSocketEvent } from '@/types';
 
 export function useWebSocket(serialNumber: string | null) {
   const [events, setEvents] = useState<WebSocketEvent[]>([]);
