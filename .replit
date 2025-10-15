@@ -1,4 +1,4 @@
-modules = ["web", "python-3.11"]
+modules = ["web", "python-3.11", "nodejs-20"]
 [agent]
 expertMode = true
 
@@ -34,7 +34,3 @@ outputType = "console"
 localPort = 8000
 externalPort = 8000
 exposeLocalhost = true
-
-[[ports]]
-localPort = 44871
-externalPort = 80
