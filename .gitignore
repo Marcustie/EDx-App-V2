@@ -1,0 +1,30 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+backend/.venv/
+backend/venv/
+*.egg-info/
+.pytest_cache/
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test files
+test_websocket.html

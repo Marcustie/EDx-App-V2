@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Device WebSocket Test</title>
+</head>
+<body>
+    <h1>Device Real-Time Data</h1>
+    <div id="output" style="font-family: monospace; white-space: pre;"></div>
+    
+    <script>
+        const ws = new WebSocket('ws://localhost:8000/ws/device/XP2-203038543232500F0031004F');
+        const output = document.getElementById('output');
+        
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            output.textContent += JSON.stringify(data, null, 2) + '\n---\n';
+            output.scrollTop = output.scrollHeight;
+        };
+        
+        ws.onopen = () => output.textContent += 'Connected!\n';
+        ws.onerror = (error) => output.textContent += 'Error: ' + error + '\n';
+    </script>
+</body>
+</html>
