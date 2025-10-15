@@ -59,10 +59,11 @@ export function Dashboard() {
             <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Scan Devices
           </Button>
-          <Link href="/instruments">
-            <Button variant="outline" size="lg">
-              View All Instruments
-            </Button>
+          <Link 
+            href="/instruments"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8"
+          >
+            View All Instruments
           </Link>
         </div>
       </div>
@@ -145,10 +146,11 @@ export function Dashboard() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Connected Devices</h2>
           {devices.length > 4 && (
-            <Link href="/instruments">
-              <Button variant="ghost" size="sm">
-                View All →
-              </Button>
+            <Link 
+              href="/instruments"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-3"
+            >
+              View All →
             </Link>
           )}
         </div>

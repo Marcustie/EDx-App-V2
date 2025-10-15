@@ -29,7 +29,7 @@
   
   /* Status Colors */
   --status-online: 142 71% 45%;
-  --status-running: 217 91% 60%;
+  --status-running: 38 92% 50%;
   --status-warning: 38 92% 50%;
   --status-error: 0 84% 60%;
   --status-inactive: 240 4% 46%;
@@ -65,7 +65,7 @@
   
   /* Status colors same in dark mode */
   --status-online: 142 71% 45%;
-  --status-running: 217 91% 60%;
+  --status-running: 38 92% 50%;
   --status-warning: 38 92% 50%;
   --status-error: 0 84% 60%;
   --status-inactive: 240 5% 65%;

@@ -50,24 +50,23 @@ export function Sidebar() {
 
             return (
               <li key={item.href}>
-                <Link href={item.href}>
-                  <a
-                    className={`
-                      flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors
-                      ${
-                        active
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                      }
-                      ${collapsed ? 'justify-center' : ''}
-                    `}
-                    title={collapsed ? item.label : undefined}
-                  >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    {!collapsed && (
-                      <span className="text-sm font-medium">{item.label}</span>
-                    )}
-                  </a>
+                <Link 
+                  href={item.href}
+                  className={`
+                    flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors
+                    ${
+                      active
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    }
+                    ${collapsed ? 'justify-center' : ''}
+                  `}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {!collapsed && (
+                    <span className="text-sm font-medium">{item.label}</span>
+                  )}
                 </Link>
               </li>
             );

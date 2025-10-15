@@ -30,6 +30,8 @@ EDx Lab Platform is a modern web-based laboratory data platform for controlling 
 - Tailwind CSS (styling)
 - Recharts (data visualization)
 - Lucide React (icons)
+- Inter font (UI typography)
+- JetBrains Mono (monospace for device IDs, code, data)
 
 ### System Architecture
 
@@ -98,18 +100,21 @@ Frontend (React) ←→ Backend (FastAPI) ←→ XP2 Devices (USB)
 - Multi-client WebSocket support
 - Event parsing (position, output, data, temperature, motor)
 
-**Frontend:**
-- Dashboard with device statistics
-- Instruments page with device grid
-- Device detail page with tabbed interface:
-  - Control tab (script upload/run, live data chart)
-  - Script tab (editor with line highlighting)
-  - Info tab (device information)
-- Scripts page (placeholder UI)
-- Dark/Light mode theme toggle
-- Responsive design (mobile to desktop)
-- Real-time WebSocket integration
-- Live data visualization with Recharts
+**Frontend UI:**
+- **Enterprise Medical Device Interface** with Fluent Design principles
+- **Sidebar Navigation** (280px fixed, collapsible to 64px icon-only)
+- **Dashboard** with multi-device grid layout and real-time statistics cards
+- **Instruments Page** with professional device cards and status indicators
+- **Device Detail Page** with 2-column control panel layout:
+  - Control tab: Controls (left) + Telemetry (right) + Full-width live chart
+  - Script tab: Lua editor with line highlighting and execution controls
+  - Info tab: Device information and connection status
+- **Scripts Page** (placeholder UI)
+- **Dark/Light Mode** theme toggle with HSL-based color system
+- **Responsive Design** (mobile to desktop breakpoints)
+- **Real-time WebSocket** integration with ref-based event processing
+- **Live Data Visualization** with Recharts (h-80 charts, dotted grid lines)
+- **Professional Typography**: Inter (UI), JetBrains Mono (code/data)
 
 ### Pending Features 🔄
 
@@ -286,6 +291,40 @@ const { events, isConnected, clearEvents } = useWebSocket(serialNumber);
 
 ---
 
+## Design System
+
+### Enterprise Medical Device Interface
+
+The application follows Fluent Design principles with a professional medical device aesthetic:
+
+**Color System (HSL-based):**
+- **Background**: `#FFFFFF` (light) / `hsl(240 10% 4%)` (dark)
+- **Primary**: `hsl(217 91% 60%)` - Medical blue accent
+- **Status Colors**:
+  - Online/Success: `hsl(142 71% 45%)` - Green
+  - Error: `hsl(0 84% 60%)` - Red
+  - Running/Warning: `hsl(38 92% 50%)` - Amber
+  - Inactive: `hsl(240 5% 65%)` - Gray
+
+**Typography:**
+- **UI Text**: Inter font family (clean, modern sans-serif)
+- **Monospace**: JetBrains Mono for device IDs, scripts, code, and data
+
+**Layout:**
+- **Sidebar**: 280px fixed width, collapsible to 64px icon-only mode
+- **2-Column Control Panel**: Controls (left) + Telemetry (right) on DeviceDetail
+- **Full-width Charts**: h-80 (320px) for primary data visualization
+- **Border Width**: 2px for cards and interactive elements
+- **Border Radius**: 6-8px for medical device credibility
+
+**Components:**
+- **Status Indicators**: Colored dots (2.5px) beside device names
+- **Cards**: 2px border, hover effects with border color transition
+- **Buttons**: Semantic color coding (green START, red STOP)
+- **Charts**: Dotted grid lines with HSL border colors
+
+---
+
 ## User Preferences
 
 No specific user preferences have been configured yet. As development continues, preferences will be documented here.
@@ -295,15 +334,28 @@ No specific user preferences have been configured yet. As development continues,
 ## Recent Changes
 
 ### October 15, 2025
+
+**Initial Setup:**
 - ✅ Initialized React + TypeScript frontend with Vite
 - ✅ Installed all required dependencies (Wouter, Tailwind, Recharts, shadcn/ui)
-- ✅ Built core UI components and page layouts
-- ✅ Implemented dark/light theme toggle
 - ✅ Configured WebSocket integration
 - ✅ Set up deployment configuration
 - ✅ Backend running on localhost:8000
 - ✅ Frontend running on port 5000
 - ✅ Fixed CORS settings for Replit proxy
+
+**Enterprise UI Redesign:**
+- ✅ Implemented HSL-based color system with medical device aesthetics
+- ✅ Added Inter and JetBrains Mono fonts from Google Fonts
+- ✅ Created Sidebar component (280px fixed, collapsible to 64px)
+- ✅ Rebuilt App.tsx with sidebar navigation layout
+- ✅ Redesigned Dashboard with multi-device grid and stats cards
+- ✅ Updated DeviceCard with status indicators and professional badges
+- ✅ Enhanced DataChart with proper sizing (h-80) and grid styling
+- ✅ Updated ScriptEditor with JetBrains Mono and line highlighting
+- ✅ Rebuilt Instruments page with enterprise card design
+- ✅ Rebuilt DeviceDetail with 2-column control panel layout
+- ✅ Fixed nested anchor tag issues in navigation
 - ✅ Created comprehensive documentation
 
 ### Next Steps
