@@ -9,10 +9,10 @@ log = logging.getLogger(__name__)
 
 app = FastAPI(title='EDx Device API')
 
-# CORS for local development
+# CORS for Replit environment - allow all origins for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:3000', 'http://localhost:5173'],
+    allow_origins=['*'],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],
