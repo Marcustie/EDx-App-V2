@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRoute } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,11 +11,20 @@ import { api } from '@/services/api';
 import type { DataPoint } from '@/types';
 import { Play, Square, Upload, Thermometer, Activity } from 'lucide-react';
 
+const MAX_DATA_POINTS = 1000;
+const MAX_OUTPUT_LINES = 500;
+
+interface Device {
+  serial_number: string;
+  com_port: string;
+  status?: string;
+}
+
 export function DeviceDetail() {
   const [, params] = useRoute('/instruments/:serial');
   const serialNumber = params?.serial || '';
   
-  const [device, setDevice] = useState<any>(null);
+  const [device, setDevice] = useState<Device | null>(null);
   const [script, setScript] = useState('-- Lua script\nprint("Hello, XP2!")');
   const [dataPoints, setDataPoints] = useState<DataPoint[]>([]);
   const [currentLine, setCurrentLine] = useState<number | undefined>();
@@ -23,37 +32,53 @@ export function DeviceDetail() {
   const [temperature, setTemperature] = useState({ ir1: 0, ir2: 0 });
   const [activeTab, setActiveTab] = useState('control');
 
-  const { events, isConnected } = useWebSocket(serialNumber);
+  const { events, isConnected, clearEvents } = useWebSocket(serialNumber);
+  const processedCountRef = useRef(0);
 
   useEffect(() => {
     loadDevice();
   }, [serialNumber]);
 
   useEffect(() => {
-    events.forEach((event) => {
+    const newEvents = events.slice(processedCountRef.current);
+    
+    newEvents.forEach((event) => {
       switch (event.type) {
         case 'data-sample':
-          setDataPoints((prev) => [...prev, { index: event.index, value: event.value }]);
+          setDataPoints((prev) => {
+            const updated = [...prev, { index: event.index, value: event.value }];
+            return updated.length > MAX_DATA_POINTS ? updated.slice(-MAX_DATA_POINTS) : updated;
+          });
           break;
         case 'script-position':
           setCurrentLine(event.line);
           break;
         case 'script-output':
         case 'log':
-          setOutput((prev) => [...prev, event.message]);
+          setOutput((prev) => {
+            const updated = [...prev, event.message];
+            return updated.length > MAX_OUTPUT_LINES ? updated.slice(-MAX_OUTPUT_LINES) : updated;
+          });
           break;
         case 'temperature':
           setTemperature((prev) => ({ ...prev, [event.sensor]: event.value }));
           break;
       }
     });
-  }, [events]);
+
+    processedCountRef.current = events.length;
+
+    if (events.length > 500) {
+      clearEvents();
+      processedCountRef.current = 0;
+    }
+  }, [events, clearEvents]);
 
   const loadDevice = async () => {
     try {
       const devices = await api.getConnectedDevices();
-      const found = devices.find((d: any) => d.serial_number === serialNumber);
-      setDevice(found);
+      const found = devices.find((d: Device) => d.serial_number === serialNumber);
+      setDevice(found || null);
     } catch (error) {
       console.error('Failed to load device:', error);
     }
