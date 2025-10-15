@@ -9,10 +9,10 @@ log = logging.getLogger(__name__)
 
 app = FastAPI(title='EDx Device API')
 
-# CORS for local development
+# CORS for Replit environment - allow all origins for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:3000', 'http://localhost:5173'],
+    allow_origins=['*'],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],
@@ -32,4 +32,4 @@ async def health():
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app, host='0.0.0.0', port=8000)
+    uvicorn.run(app, host='localhost', port=8000)

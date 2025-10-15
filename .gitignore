@@ -28,3 +28,11 @@ Thumbs.db
 
 # Test files
 test_websocket.html
+
+# Node.js
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+*.tsbuildinfo
+.pythonlibs/

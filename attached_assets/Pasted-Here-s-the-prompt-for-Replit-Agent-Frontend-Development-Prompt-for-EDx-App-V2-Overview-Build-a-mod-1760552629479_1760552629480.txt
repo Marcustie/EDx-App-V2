@@ -1,0 +1,234 @@
+Here's the prompt for Replit Agent:
+
+Frontend Development Prompt for EDx-App-V2
+Overview
+Build a modern React frontend for ElectraDx XP2 laboratory data platform. The backend FastAPI server is already complete and running at http://localhost:8000 - DO NOT modify any backend code.
+Tech Stack (EXACT Requirements)
+
+React 18 + TypeScript
+Vite as build tool
+Wouter for routing (NOT React Router)
+shadcn/ui for components
+Tailwind CSS for styling
+Recharts for data visualization
+Lucide React for icons
+
+Project Structure
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── ui/              # shadcn/ui components
+│   │   ├── DeviceCard.tsx
+│   │   ├── DataChart.tsx
+│   │   ├── ScriptEditor.tsx
+│   │   └── WebSocketProvider.tsx
+│   ├── pages/
+│   │   ├── Dashboard.tsx
+│   │   ├── Instruments.tsx
+│   │   ├── DeviceDetail.tsx
+│   │   └── Scripts.tsx
+│   ├── services/
+│   │   └── api.ts           # API client functions
+│   ├── hooks/
+│   │   └── useWebSocket.ts
+│   ├── types/
+│   │   └── index.ts         # TypeScript interfaces
+│   ├── App.tsx
+│   └── main.tsx
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+└── tailwind.config.js
+Backend API Endpoints (Use These - Already Working)
+Device Management
+
+GET /devices/scan - Scan for USB devices
+POST /devices/connect?com_port={port}&serial_number={serial} - Connect device
+GET /devices/connected - List connected devices
+POST /devices/disconnect/{serial_number} - Disconnect device
+POST /devices/upload-script/{serial_number} - Upload Lua script (body: {"script": "..."})
+POST /devices/run-script/{serial_number}?metadata={metadata} - Run script
+
+WebSocket
+
+ws://localhost:8000/ws/device/{serial_number} - Real-time events
+
+Event Types:
+typescripttype WebSocketEvent = 
+  | { type: 'script-position', line: number }
+  | { type: 'script-output', message: string }
+  | { type: 'data-sample', index: number, value: number }
+  | { type: 'temperature', sensor: string, value: number }
+  | { type: 'motor-status', message: string }
+  | { type: 'log', message: string }
+Pages to Build
+1. Dashboard (/)
+Layout:
+
+Header with app title "EDx Lab Platform"
+Stats cards: Total Devices, Online, Active, Scripts
+Device grid (4 columns) showing recent devices
+"Scan Devices" and "View All" buttons
+
+Device Card:
+
+Device serial number (truncated, e.g., "XP2-2030...004F")
+Status badge (connected/disconnected)
+Temperature display (if available)
+Click → navigate to /instruments/:serial
+
+2. Instruments Page (/instruments)
+Features:
+
+Search bar and status filter
+"Scan for Devices" button (calls /devices/scan)
+Device grid (responsive: 1-4 columns)
+Each card:
+
+Serial number
+COM port
+Status indicator
+Connect/Disconnect button
+Click card → /instruments/:serial
+
+
+
+3. Device Detail Page (/instruments/:serial)
+Tabs:
+Tab 1: Control
+
+Left side: Control buttons (START, STOP, UPLOAD)
+Right side: Live data chart (Recharts line chart)
+Bottom: Output console (script-output events)
+
+Tab 2: Script
+
+Textarea with monospace font (JetBrains Mono)
+Line numbers
+Highlight current line (from script-position WebSocket events)
+Upload button (calls /devices/upload-script/{serial})
+Run button (calls /devices/run-script/{serial})
+
+Tab 3: Info
+
+Device serial, COM port, status
+Temperature readings
+Disconnect button
+
+4. Scripts Page (/scripts)
+Note: Script library endpoints not yet built in backend
+UI Only (Non-functional):
+
+Table with Name, Size, Uploaded columns
+Upload button (disabled, show tooltip: "Coming soon")
+"Backend endpoints not yet implemented" message
+
+Key Components to Create
+WebSocketProvider.tsx
+typescript// Context provider for WebSocket connection
+// Connect to: ws://localhost:8000/ws/device/{serial}
+// Handle reconnection with exponential backoff
+// Broadcast events to subscribers
+DataChart.tsx
+typescript// Recharts LineChart for chronoamperometry data
+// Buffer last 300 points
+// Update on 'data-sample' WebSocket events
+// X-axis: index, Y-axis: value
+ScriptEditor.tsx
+typescript// Textarea with line highlighting
+// Props: script, currentLine, onChange
+// Highlight line based on WebSocket 'script-position' events
+api.ts Service
+typescriptconst BASE_URL = 'http://localhost:8000';
+
+export const api = {
+  scanDevices: () => fetch(`${BASE_URL}/devices/scan`).then(r => r.json()),
+  connectDevice: (comPort: string, serial: string) => 
+    fetch(`${BASE_URL}/devices/connect?com_port=${comPort}&serial_number=${serial}`, {method: 'POST'}),
+  getConnectedDevices: () => fetch(`${BASE_URL}/devices/connected`).then(r => r.json()),
+  uploadScript: (serial: string, script: string) =>
+    fetch(`${BASE_URL}/devices/upload-script/${serial}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({script})
+    }),
+  runScript: (serial: string, metadata: string) =>
+    fetch(`${BASE_URL}/devices/run-script/${serial}?metadata=${metadata}`, {method: 'POST'}),
+  disconnectDevice: (serial: string) =>
+    fetch(`${BASE_URL}/devices/disconnect/${serial}`, {method: 'POST'})
+};
+TypeScript Interfaces
+typescriptinterface Device {
+  serial_number: string;
+  com_port: string;
+}
+
+interface ConnectedDevice extends Device {
+  status: 'connected' | 'idle' | 'running' | 'error';
+}
+
+interface DataPoint {
+  index: number;
+  value: number;
+}
+Design Requirements
+
+Colors: Blue primary (#3B82F6), professional medical device aesthetic
+Typography: Inter for UI, JetBrains Mono for code/serial numbers
+Theme: Light mode only initially
+Responsive: Mobile → Desktop (use Tailwind breakpoints)
+Status badges: Green (connected), Gray (disconnected), Yellow (running), Red (error)
+
+Critical Implementation Notes
+
+DO NOT create any backend files - backend is complete
+Use Wouter, not React Router - import { Route, Link } from 'wouter'
+WebSocket must handle reconnection - exponential backoff (250ms → 5s)
+Data chart must buffer last 300 points - prevent memory issues
+Script editor must highlight current line - subscribe to 'script-position' events
+API calls must handle errors - show toast notifications
+Serial numbers are long - truncate display (e.g., "XP2-2030...004F")
+
+Installation Commands
+bashnpm create vite@latest frontend -- --template react-ts
+cd frontend
+npm install wouter recharts lucide-react
+npx shadcn-ui@latest init
+npx shadcn-ui@latest add button card input textarea tabs badge
+Example WebSocket Hook
+typescriptfunction useWebSocket(serialNumber: string) {
+  const [events, setEvents] = useState<WebSocketEvent[]>([]);
+  
+  useEffect(() => {
+    const ws = new WebSocket(`ws://localhost:8000/ws/device/${serialNumber}`);
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setEvents(prev => [...prev, data]);
+    };
+    
+    return () => ws.close();
+  }, [serialNumber]);
+  
+  return events;
+}
+Success Criteria
+
+ Can scan and see devices
+ Can connect/disconnect devices
+ Can upload and run scripts
+ WebSocket shows real-time events
+ Script editor highlights current line during execution
+ Data chart updates in real-time
+ Responsive on desktop and tablet
+ No backend modifications
+
+Start Command After Build
+bash# Terminal 1 (Backend - already running)
+cd EDx-App-V2
+python backend/main.py
+
+# Terminal 2 (Frontend - you build this)
+cd frontend
+npm run dev
+Build the frontend ONLY. Backend is complete and must not be touched.
