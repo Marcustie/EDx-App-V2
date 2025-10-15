@@ -141,6 +141,21 @@ export function Dashboard() {
         </Card>
       </div>
 
+      {/* Experiment Builder */}
+      <Card className="border-2">
+        <CardHeader>
+          <CardTitle className="text-lg">Experiment Builder</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Create new experiments with metadata and LabGuru integration
+          </p>
+          <div className="text-sm text-muted-foreground">
+            Experiment builder coming soon...
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Device Grid */}
       <div>
         <div className="flex items-center justify-between mb-6">
