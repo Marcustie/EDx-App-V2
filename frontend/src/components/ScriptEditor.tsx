@@ -26,14 +26,16 @@ export function ScriptEditor({ script, currentLine, onChange, readOnly }: Script
   const lines = script.split('\n');
 
   return (
-    <div className="relative font-mono text-sm">
+    <div className="relative border border-border rounded-md overflow-hidden bg-muted/30">
       <div className="flex">
-        <div className="bg-muted px-3 py-2 text-muted-foreground select-none border-r">
+        <div className="bg-muted px-4 py-3 text-muted-foreground select-none border-r border-border font-mono text-sm">
           {lines.map((_, index) => (
             <div
               key={index}
-              className={`text-right ${
-                index === currentLine ? 'bg-yellow-200 dark:bg-yellow-900' : ''
+              className={`text-right leading-6 ${
+                index === currentLine 
+                  ? 'bg-[hsl(var(--status-running))]/20 text-[hsl(var(--status-running))] font-semibold' 
+                  : ''
               }`}
             >
               {index + 1}
@@ -45,10 +47,11 @@ export function ScriptEditor({ script, currentLine, onChange, readOnly }: Script
           value={script}
           onChange={(e) => onChange(e.target.value)}
           readOnly={readOnly}
-          className="font-mono border-0 rounded-none resize-none min-h-[400px] focus-visible:ring-0"
+          className="font-mono text-sm border-0 rounded-none resize-none min-h-[400px] focus-visible:ring-0 bg-transparent"
           style={{
             lineHeight: '1.5rem',
-            padding: '0.5rem',
+            padding: '0.75rem 1rem',
+            fontFamily: '"JetBrains Mono", monospace',
           }}
         />
       </div>
