@@ -5,19 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { DeviceCard } from '@/components/DeviceCard';
 import { api } from '@/services/api';
-import { Search, RefreshCw, FlaskConical } from 'lucide-react';
-
-interface Device {
-  serial_number: string;
-  com_port: string;
-  status?: string;
-}
+import type { ConnectedDevice, ScannedDevice } from '@/types/api';
+import { Search, RefreshCw, FlaskConical, Plug } from 'lucide-react';
 
 export function Instruments() {
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [availableDevices, setAvailableDevices] = useState<Device[]>([]);
+  const [devices, setDevices] = useState<ConnectedDevice[]>([]);
+  const [availableDevices, setAvailableDevices] = useState<ScannedDevice[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScanning, setIsScanning] = useState(false);
+  const [connectingDevices, setConnectingDevices] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadDevices();
@@ -48,12 +44,53 @@ export function Instruments() {
   };
 
   const handleConnect = async (comPort: string, serial: string) => {
+    // Mark device as connecting
+    setConnectingDevices(prev => new Set(prev).add(serial));
+
     try {
+      // Optimistic update - show device as connected immediately
+      setDevices(prev => [...prev, { 
+        serial_number: serial, 
+        com_port: comPort,
+        status: 'connecting' 
+      }]);
+      
+      // Connect device
       await api.connectDevice(comPort, serial);
+      
+      // Give backend time to update internal state (500ms delay)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Verify connection
       await loadDevices();
-      setAvailableDevices([]);
+      
+      // ✅ FIXED: Only remove THIS device from available list, not all devices
+      setAvailableDevices(prev => prev.filter(d => d.serial_number !== serial));
     } catch (error) {
       console.error('Failed to connect device:', error);
+      
+      // Rollback optimistic update on error
+      await loadDevices();
+    } finally {
+      // Remove from connecting set
+      setConnectingDevices(prev => {
+        const next = new Set(prev);
+        next.delete(serial);
+        return next;
+      });
+    }
+  };
+
+  const handleConnectAll = async () => {
+    // Connect all available devices in parallel
+    const connectPromises = availableDevices.map(device => 
+      handleConnect(device.com_port, device.serial_number)
+    );
+    
+    try {
+      await Promise.all(connectPromises);
+    } catch (error) {
+      console.error('Failed to connect all devices:', error);
     }
   };
 
@@ -81,7 +118,12 @@ export function Instruments() {
             Manage XP2 electrochemical biosensor devices
           </p>
         </div>
-        <Button onClick={handleScan} disabled={isScanning} size="lg">
+        <Button
+          onClick={handleScan}
+          disabled={isScanning}
+          size="lg"
+          variant={isScanning ? 'scanning' : 'default'}
+        >
           <RefreshCw className={`mr-2 h-4 w-4 ${isScanning ? 'animate-spin' : ''}`} />
           {isScanning ? 'Scanning...' : 'Scan for Devices'}
         </Button>
@@ -101,9 +143,21 @@ export function Instruments() {
       {/* Available Devices (after scan) */}
       {availableDevices.length > 0 && (
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold">Available Devices</h2>
-            <div className="h-px flex-1 bg-border"></div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold">Available Devices ({availableDevices.length})</h2>
+              <div className="h-px flex-1 bg-border"></div>
+            </div>
+            {availableDevices.length > 1 && (
+              <Button 
+                onClick={handleConnectAll}
+                disabled={connectingDevices.size > 0}
+                variant="secondary"
+              >
+                <Plug className="mr-2 h-4 w-4" />
+                Connect All
+              </Button>
+            )}
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {availableDevices.map((device) => (
@@ -111,7 +165,7 @@ export function Instruments() {
                 key={device.serial_number}
                 serialNumber={device.serial_number}
                 comPort={device.com_port}
-                status="disconnected"
+                status={connectingDevices.has(device.serial_number) ? 'connecting' : 'disconnected'}
                 onConnect={() => handleConnect(device.com_port, device.serial_number)}
               />
             ))}
@@ -141,9 +195,14 @@ export function Instruments() {
                   : 'Try adjusting your search criteria'}
               </p>
               {devices.length === 0 && (
-                <Button onClick={handleScan} disabled={isScanning} size="lg">
+                <Button
+                  onClick={handleScan}
+                  disabled={isScanning}
+                  size="lg"
+                  variant={isScanning ? 'scanning' : 'default'}
+                >
                   <RefreshCw className={`mr-2 h-4 w-4 ${isScanning ? 'animate-spin' : ''}`} />
-                  Scan for Devices
+                  {isScanning ? 'Scanning...' : 'Scan for Devices'}
                 </Button>
               )}
             </CardContent>

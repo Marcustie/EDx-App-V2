@@ -36,3 +36,29 @@ frontend/dist/
 frontend/build/
 *.tsbuildinfo
 .pythonlibs/
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Frontend / build caches
+frontend/.vite/
+node_modules/
+dist/
+build/
+
+# Editors / logs
+.vscode/
+*.log
+
+# App-specific
+frontend/src/pages/DeviceDetail.tsx.bak
+frontend/.claude/
+.claude/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Windows device-file artifact
+nul
