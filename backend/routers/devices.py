@@ -10,10 +10,38 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from platform_interface.device.utils import ping_all_ports, connect_device, AvailableDevice
 
 log = logging.getLogger(__name__)
+logger = log  # Alias for consistency with requirements
 router = APIRouter(prefix="/devices", tags=["devices"])
 
 # Store connected devices
 connected_devices: Dict[str, any] = {}
+
+# Request models
+from pydantic import BaseModel
+
+class ScriptUploadRequest(BaseModel):
+    script: str
+
+
+def _extract_script_from_response(resp_lines: list[str]) -> str:
+    """Extract decoded Lua script from gpbuf_print response."""
+    script_lines = []
+    in_script = False
+
+    for line in resp_lines:
+        # Skip empty lines, error codes, and metadata
+        stripped = line.strip()
+        if not stripped or stripped.startswith('@') or stripped.startswith('!'):
+            continue
+        # Check if line looks like base64 or system output
+        if 'gpbuf' in stripped.lower() or stripped.startswith('=='):
+            continue
+        # Collect actual script lines
+        if stripped and not any(x in stripped for x in ['@', '==', 'gpbuf']):
+            script_lines.append(line)
+            in_script = True
+
+    return '\n'.join(script_lines) if script_lines else ''
 
 @router.get("/scan")
 async def scan_devices() -> List[Dict]:
@@ -130,22 +158,52 @@ async def disconnect_device(serial_number: str) -> Dict:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/upload-script/{serial_number}")
-async def upload_script(serial_number: str, script: str) -> Dict:
+async def upload_script(serial_number: str, request: ScriptUploadRequest) -> Dict:
     '''Upload a Lua script to the device'''
     try:
         if serial_number not in connected_devices:
             raise HTTPException(status_code=404, detail="Device not connected")
-        
+
         device = connected_devices[serial_number]
-        device.upload_script(script)
-        
-        log.info(f"Script uploaded to device {serial_number}")
+        # Do not await non-async methods
+        device.upload_script(request.script)
+
+        # Ask device to print decoded buffer and extract script text
+        verification_response = await device.send_command("!gpbuf_print 0")
+        logger.info(f"📜 Script verification for {serial_number}: {verification_response}")
+
+        decoded_script: str = _extract_script_from_response(verification_response)
+        line_count: int = len(decoded_script.splitlines()) if decoded_script else 0
+        ready: bool = line_count >= 5
+        source: str = "device" if decoded_script else "request"
+
+        # Prefer decoded script for clients; keep event 'type' stable
+        from routers.websocket import broadcast_to_device
+        await broadcast_to_device(
+            serial_number,
+            {
+                "type": "script-uploaded",
+                "script": decoded_script or request.script or "",
+                "lines": line_count,
+                "ready": ready,
+                "source": source,
+                "timestamp": asyncio.get_event_loop().time(),
+            },
+        )
+
+        logger.info(
+            f"✅ Script uploaded to device {serial_number} "
+            f"(ready={ready}, lines={line_count}, source={source}) and broadcast to WebSocket"
+        )
         return {
             "status": "uploaded",
-            "serial_number": serial_number
+            "serial_number": serial_number,
+            "ready": ready,
+            "lines": line_count,
+            "source": source,
         }
     except Exception as e:
-        log.error(f"Error uploading script: {e}")
+        logger.error(f"Error uploading script: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/run-script/{serial_number}")

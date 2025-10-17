@@ -55,9 +55,14 @@ export function Dashboard() {
           <p className="text-sm text-muted-foreground mt-1">System overview and device status</p>
         </div>
         <div className="flex gap-3">
-          <Button onClick={handleScan} disabled={loading} size="lg">
+          <Button
+            onClick={handleScan}
+            disabled={loading}
+            size="lg"
+            variant={loading ? 'scanning' : 'default'}
+          >
             <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Scan Devices
+            {loading ? 'Scanning...' : 'Scan Devices'}
           </Button>
           <Link 
             href="/instruments"
@@ -182,9 +187,14 @@ export function Dashboard() {
               <p className="text-sm text-muted-foreground mb-6 text-center max-w-sm">
                 Click "Scan Devices" to discover available XP2 electrochemical biosensor instruments
               </p>
-              <Button onClick={handleScan} disabled={loading} size="lg">
+              <Button
+                onClick={handleScan}
+                disabled={loading}
+                size="lg"
+                variant={loading ? 'scanning' : 'default'}
+              >
                 <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                Scan for Devices
+                {loading ? 'Scanning...' : 'Scan for Devices'}
               </Button>
             </CardContent>
           </Card>
