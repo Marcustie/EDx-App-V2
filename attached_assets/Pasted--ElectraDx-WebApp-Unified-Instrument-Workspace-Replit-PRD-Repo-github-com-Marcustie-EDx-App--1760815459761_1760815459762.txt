@@ -1,0 +1,278 @@
+🧭 ElectraDx WebApp — Unified Instrument Workspace (Replit PRD)
+
+Repo: github.com/Marcustie/EDx-App-V2
+
+Target Branch: feature/tabbed-instruments-ui
+Environment: React + Vite + TypeScript + Tailwind + shadcn/ui + FastAPI backend (no changes needed)
+
+1️⃣ Purpose
+
+Consolidate instrument control, script tracking, and live analysis into a single tabbed Instruments workspace.
+Eliminate WebSocket resets and page-based state loss while improving visibility across multiple connected devices (XP2 / XP3 / VP1 etc.).
+
+2️⃣ Goals
+
+✅ Keep WebSocket connections alive across tabs (no unmount).
+✅ Persistent UI state (scripts, run state, current line).
+✅ Unified layout:
+
+Tabs = instruments
+
+Script viewer + console
+
+Bottom toggleable Potential Stat chart
+
+Metadata box (per instrument)
+✅ Integrated dashboard with toggle fix and metadata builder connection.
+
+3️⃣ Branding & Style
+
+Logo: image001 (light) and image002 (dark)
+
+show on dashboard + optionally in app footer/bottom-corner watermark.
+
+Font: Outfit (regular, medium, semibold weights).
+
+load globally; fallback = Inter, sans-serif.
+
+replace headings + UI text if layout unaffected.
+
+Color theme: keep Tailwind theme; support dark/light automatic swap (logo variant changes with theme).
+
+4️⃣ Layout Overview
+┌──────────────────────────────────────────────┐
+│ Header / Nav  (ElectraDx logo, mode toggle) │
+├──────────────────────────────────────────────┤
+│ [Dashboard Toggle ▾]                        │  ← fix z-index: toggle button must stay above overlay
+├──────────────────────────────────────────────┤
+│ Tab Bar: [ED-XP3-001] [ED-VP1-002] [+]      │
+├──────────────────────────────────────────────┤
+│ Active Tab Content                          │
+│ ┌──────────────────────────┬────────────────┐│
+│ │ Script Viewer (Lua)      │ Console Panel  ││
+│ │ • full script text       │ • run / stop   ││
+│ │ • line highlight         │ • command box  ││
+│ │ • scroll sync            │ • send→device  ││
+│ └──────────────────────────┴────────────────┘│
+│                                              │
+│ Metadata Box  #EXP=101 #LEVEL=2 (editable)   │
+├──────────────────────────────────────────────┤
+│ ▼  Potential Stat Panel (toggleable)         │
+│ • multi-instrument chart (current vs time)   │
+│ • checkboxes to show/hide instruments        │
+│ • placeholder RTIA A/B/C selector            │
+└──────────────────────────────────────────────┘
+
+5️⃣ Page Roles
+Dashboard
+
+Shows system summary + toggle button (fix z-index).
+
+Hosts Experiment Builder for tag presets → apply to instruments.
+
+Quick links: Open Instruments Workspace, View Script Library.
+
+Instruments
+
+Persistent tabs (one per connected device).
+
+Console + script viewer side-by-side.
+
+Metadata box below viewer; editable.
+
+Potential Stat chart (bottom, toggleable).
+
+Right-hand drawer: script library + batch upload.
+
+Scripts Library
+
+Create/edit/delete scripts.
+
+Used by drawer for instrument uploads.
+
+LabGuru
+
+Embed improved labguru-form.tsx.
+
+Accessible via sub-tab or modal per instrument.
+
+6️⃣ Functional Requirements
+Tabs & WebSockets
+
+Each tab mounts once; WS connection per device.
+
+Tab header text uses serial (e.g., ED-XP3-104).
+
+Max tabs = 5 (default) | configurable to 10.
+
+Reconnect banner on disconnect (“Reconnecting…”).
+
+Script Viewer
+
+Deterministic capture logic:
+
+Start → !gpbuf_print 0
+
+Stop → device prompt or backend-finished event or 1.2 s idle.
+
+Normalize → remove CR, collapse dupes, strip pre-echo.
+
+Highlight script-position line.
+
+Persist to store (Zustand + persist).
+
+Console
+
+Adjacent panel to viewer.
+
+Supports multi-instrument send (checkbox targeting).
+
+Buttons: Run, Stop, Send.
+
+Metadata Box
+
+Displays tags from Dashboard Experiment Builder.
+
+Editable inline (using TagEditor logic).
+
+Box under script pane for clarity.
+
+Potential Stat Panel
+
+Shared bottom chart.
+
+Shows multi-instrument current/time traces.
+
+Placeholder for RTIA A/B/C readings.
+
+Toggle visibility (collapse arrow).
+
+Future: real data from data-sample WS event.
+
+Right Drawer (Script Upload)
+
+Lists scripts from library.
+
+Multi-select instruments + scripts.
+
+Upload buttons: “Upload Selected” / “Upload All Visible”.
+
+Progress per instrument tab.
+
+7️⃣ State Management
+
+Zustand Store Shape
+
+{
+  scanInProgress: boolean;
+  connectedDevices: string[];
+  perDevice: Record<Serial, {
+    uploadedScript: string;
+    uploadedScriptReady: boolean;
+    currentLine: number;
+    isRunning: boolean;
+    captureActive: boolean;
+    metadataTags: MetaTag[];
+    showInChart: boolean;
+    rtiaChannel?: 'A'|'B'|'C';
+  }>;
+}
+
+
+Rules
+
+Only store writes to localStorage via persist.
+
+Components never touch localStorage directly.
+
+8️⃣ Backend Contract (unchanged)
+
+REST: /api/devices, /api/devices/connect, /api/devices/scan
+
+WS: /ws/device/{serial} → events data-sample, temperature, script-output, script-position, log, script-uploaded
+
+Optionally emit {type:"log", event:"backend-finished"} after upload.
+No backend edits required.
+
+9️⃣ Implementation Checklist (for Replit)
+Step	Task
+1	Create branch feature/tabbed-instruments-ui
+2	Add Zustand store src/store/appStore.ts
+3	Build pages/Instruments/index.tsx (tab system + drawer + chart)
+4	Migrate DeviceDetail logic into InstrumentTab.tsx
+5	Implement ScriptViewer + Console + Metadata box
+6	Add PotentialStatChart (placeholder with toggle)
+7	Fix Dashboard toggle button z-index (overlap bug)
+8	Integrate Outfit font & logos in layout
+9	QA against Acceptance Criteria below
+🔍 Acceptance Criteria
+
+Tabs persist state and WS across switches.
+
+Script appears after upload → remains after navigation + reload.
+
+script-position updates highlight smoothly.
+
+Console works per-instrument.
+
+Metadata editable inline.
+
+Potential Stat chart shows live placeholders; toggle works.
+
+Dashboard toggle button no longer obscured.
+
+Outfit font and logos render correctly (dark/light).
+
+⚙️ Brand Integration Details
+Logo Placement
+
+Header: top-left (replaces current text title).
+
+Dashboard: hero card center.
+
+Optional footer watermark bottom-right (low opacity).
+
+Font Setup
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+:root {
+  --font-sans: 'Outfit', Inter, sans-serif;
+}
+
+
+Import once in index.css and set font-family: var(--font-sans);.
+
+🔒 Notes for Replit Developers
+
+Do not modify backend API/WS contracts.
+
+Frontend only.
+
+Respect existing TypeScript interfaces.
+
+Use VITE_API_BASE_URL + VITE_WS_URL env vars.
+
+Use Tailwind + shadcn for UI consistency.
+
+Follow commit structure:
+
+feat(ui): add tabbed instruments
+
+fix(ui): dashboard toggle z-index
+
+feat(chart): potential stat placeholder
+
+🔚 Summary
+
+This redesign turns the ElectraDx WebApp into a persistent, multi-instrument control environment.
+It modernizes the UX around real-time operation, centralizes metadata + script workflows, and positions the app for XP3 / VP1 instrument generations.

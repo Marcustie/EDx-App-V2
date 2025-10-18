@@ -14,8 +14,8 @@ import { AuditLog } from '@/pages/AuditLog';
 
 function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isConnected, setIsConnected] = useState(true);
-  const [retryCount, setRetryCount] = useState(0);
+  const [isConnected] = useState(true);
+  const [retryCount] = useState(0);
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
