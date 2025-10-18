@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 import asyncio
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict, Optional
@@ -15,6 +15,10 @@ router = APIRouter(prefix="/devices", tags=["devices"])
 
 # Store connected devices
 connected_devices: Dict[str, any] = {}
+
+# Track script execution state per device
+# Format: { serial_number: { "running": bool, "start_time": float, "current_line": int | None } }
+running_scripts: Dict[str, Dict] = {}
 
 # Request models
 from pydantic import BaseModel
@@ -114,6 +118,40 @@ async def list_connected_devices() -> List[Dict]:
         {"serial_number": device.serial_number, "com_port": device.port}
         for device in connected_devices.values()
     ]
+
+@router.get("/script-state/{serial_number}")
+async def get_script_state(serial_number: str) -> Dict:
+    '''Query current script execution state for a device'''
+    try:
+        if serial_number not in connected_devices:
+            raise HTTPException(status_code=404, detail="Device not connected")
+        
+        device = connected_devices[serial_number]
+        
+        # Check if script is running
+        execution_state = running_scripts.get(serial_number, {})
+        is_running = execution_state.get("running", False)
+        current_line = execution_state.get("current_line")
+        
+        # Verify device is responsive
+        try:
+            await device.send_command("!identify", wait_for_error=True, timeout=2)
+            device_connected = True
+        except:
+            device_connected = False
+        
+        return {
+            "serial_number": serial_number,
+            "device_connected": device_connected,
+            "running": is_running,
+            "current_line": current_line,
+            "start_time": execution_state.get("start_time"),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error querying script state: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 @router.post("/command/{serial_number}")
 async def send_command(serial_number: str, command: str, wait_for_response: bool = True) -> Dict:
     '''Send a command to a connected device'''
@@ -170,7 +208,7 @@ async def upload_script(serial_number: str, request: ScriptUploadRequest) -> Dic
 
         # Ask device to print decoded buffer and extract script text
         verification_response = await device.send_command("!gpbuf_print 0")
-        logger.info(f"📜 Script verification for {serial_number}: {verification_response}")
+        logger.info(f"?? Script verification for {serial_number}: {verification_response}")
 
         decoded_script: str = _extract_script_from_response(verification_response)
         line_count: int = len(decoded_script.splitlines()) if decoded_script else 0
@@ -192,7 +230,7 @@ async def upload_script(serial_number: str, request: ScriptUploadRequest) -> Dic
         )
 
         logger.info(
-            f"✅ Script uploaded to device {serial_number} "
+            f"? Script uploaded to device {serial_number} "
             f"(ready={ready}, lines={line_count}, source={source}) and broadcast to WebSocket"
         )
         return {
