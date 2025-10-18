@@ -54,150 +54,150 @@ const defaultDeviceState: DeviceState = {
   rtiaChannel: 'A',
 };
 
-export const useAppStore = create<AppState>()((set) => ({
-      scanInProgress: false,
-      connectedDevices: [],
-      perDevice: {},
-      activeTab: null,
+export const useAppStore = create<AppState>((set) => ({
+  scanInProgress: false,
+  connectedDevices: [],
+  perDevice: {},
+  activeTab: null,
 
-      setScanInProgress: (scanning) => set({ scanInProgress: scanning }),
-      
-      addDevice: (serial) =>
-        set((state) => {
-          if (state.connectedDevices.includes(serial)) return state;
-          return {
-            connectedDevices: [...state.connectedDevices, serial],
-            perDevice: {
-              ...state.perDevice,
-              [serial]: state.perDevice[serial] || { ...defaultDeviceState },
-            },
-            activeTab: state.activeTab || serial,
-          };
-        }),
-      
-      removeDevice: (serial) =>
-        set((state) => {
-          const newDevices = state.connectedDevices.filter((s) => s !== serial);
-          const { [serial]: removed, ...newPerDevice } = state.perDevice;
-          return {
-            connectedDevices: newDevices,
-            perDevice: newPerDevice,
-            activeTab: state.activeTab === serial ? newDevices[0] || null : state.activeTab,
-          };
-        }),
-      
-      setDevices: (devices) =>
-        set((state) => {
-          const newPerDevice = { ...state.perDevice };
-          devices.forEach((serial) => {
-            if (!newPerDevice[serial]) {
-              newPerDevice[serial] = { ...defaultDeviceState };
-            }
-          });
-          return {
-            connectedDevices: devices,
-            perDevice: newPerDevice,
-            activeTab: state.activeTab && devices.includes(state.activeTab)
-              ? state.activeTab
-              : devices[0] || null,
-          };
-        }),
-      
-      setActiveTab: (serial) => set({ activeTab: serial }),
-      
-      setUploadedScript: (serial, script) =>
-        set((state) => ({
-          perDevice: {
-            ...state.perDevice,
-            [serial]: {
-              ...(state.perDevice[serial] || defaultDeviceState),
-              uploadedScript: script,
-            },
-          },
-        })),
-      
-      setScriptReady: (serial, ready) =>
-        set((state) => ({
-          perDevice: {
-            ...state.perDevice,
-            [serial]: {
-              ...(state.perDevice[serial] || defaultDeviceState),
-              uploadedScriptReady: ready,
-            },
-          },
-        })),
-      
-      setCurrentLine: (serial, line) =>
-        set((state) => ({
-          perDevice: {
-            ...state.perDevice,
-            [serial]: {
-              ...(state.perDevice[serial] || defaultDeviceState),
-              currentLine: line,
-            },
-          },
-        })),
-      
-      setIsRunning: (serial, running) =>
-        set((state) => ({
-          perDevice: {
-            ...state.perDevice,
-            [serial]: {
-              ...(state.perDevice[serial] || defaultDeviceState),
-              isRunning: running,
-            },
-          },
-        })),
-      
-      setCaptureActive: (serial, active) =>
-        set((state) => ({
-          perDevice: {
-            ...state.perDevice,
-            [serial]: {
-              ...(state.perDevice[serial] || defaultDeviceState),
-              captureActive: active,
-            },
-          },
-        })),
-      
-      setMetadataTags: (serial, tags) =>
-        set((state) => ({
-          perDevice: {
-            ...state.perDevice,
-            [serial]: {
-              ...(state.perDevice[serial] || defaultDeviceState),
-              metadataTags: tags,
-            },
-          },
-        })),
-      
-      setShowInChart: (serial, show) =>
-        set((state) => ({
-          perDevice: {
-            ...state.perDevice,
-            [serial]: {
-              ...(state.perDevice[serial] || defaultDeviceState),
-              showInChart: show,
-            },
-          },
-        })),
-      
-      setRtiaChannel: (serial, channel) =>
-        set((state) => ({
-          perDevice: {
-            ...state.perDevice,
-            [serial]: {
-              ...(state.perDevice[serial] || defaultDeviceState),
-              rtiaChannel: channel,
-            },
-          },
-        })),
-      
-      clearDeviceState: (serial) =>
-        set((state) => ({
-          perDevice: {
-            ...state.perDevice,
-            [serial]: { ...defaultDeviceState },
-          },
-        })),
-    }));
+  setScanInProgress: (scanning) => set({ scanInProgress: scanning }),
+  
+  addDevice: (serial) =>
+    set((state) => {
+      if (state.connectedDevices.includes(serial)) return state;
+      return {
+        connectedDevices: [...state.connectedDevices, serial],
+        perDevice: {
+          ...state.perDevice,
+          [serial]: state.perDevice[serial] || { ...defaultDeviceState },
+        },
+        activeTab: state.activeTab || serial,
+      };
+    }),
+  
+  removeDevice: (serial) =>
+    set((state) => {
+      const newDevices = state.connectedDevices.filter((s) => s !== serial);
+      const { [serial]: removed, ...newPerDevice } = state.perDevice;
+      return {
+        connectedDevices: newDevices,
+        perDevice: newPerDevice,
+        activeTab: state.activeTab === serial ? newDevices[0] || null : state.activeTab,
+      };
+    }),
+  
+  setDevices: (devices) =>
+    set((state) => {
+      const newPerDevice = { ...state.perDevice };
+      devices.forEach((serial) => {
+        if (!newPerDevice[serial]) {
+          newPerDevice[serial] = { ...defaultDeviceState };
+        }
+      });
+      return {
+        connectedDevices: devices,
+        perDevice: newPerDevice,
+        activeTab: state.activeTab && devices.includes(state.activeTab)
+          ? state.activeTab
+          : devices[0] || null,
+      };
+    }),
+  
+  setActiveTab: (serial) => set({ activeTab: serial }),
+  
+  setUploadedScript: (serial, script) =>
+    set((state) => ({
+      perDevice: {
+        ...state.perDevice,
+        [serial]: {
+          ...(state.perDevice[serial] || defaultDeviceState),
+          uploadedScript: script,
+        },
+      },
+    })),
+  
+  setScriptReady: (serial, ready) =>
+    set((state) => ({
+      perDevice: {
+        ...state.perDevice,
+        [serial]: {
+          ...(state.perDevice[serial] || defaultDeviceState),
+          uploadedScriptReady: ready,
+        },
+      },
+    })),
+  
+  setCurrentLine: (serial, line) =>
+    set((state) => ({
+      perDevice: {
+        ...state.perDevice,
+        [serial]: {
+          ...(state.perDevice[serial] || defaultDeviceState),
+          currentLine: line,
+        },
+      },
+    })),
+  
+  setIsRunning: (serial, running) =>
+    set((state) => ({
+      perDevice: {
+        ...state.perDevice,
+        [serial]: {
+          ...(state.perDevice[serial] || defaultDeviceState),
+          isRunning: running,
+        },
+      },
+    })),
+  
+  setCaptureActive: (serial, active) =>
+    set((state) => ({
+      perDevice: {
+        ...state.perDevice,
+        [serial]: {
+          ...(state.perDevice[serial] || defaultDeviceState),
+          captureActive: active,
+        },
+      },
+    })),
+  
+  setMetadataTags: (serial, tags) =>
+    set((state) => ({
+      perDevice: {
+        ...state.perDevice,
+        [serial]: {
+          ...(state.perDevice[serial] || defaultDeviceState),
+          metadataTags: tags,
+        },
+      },
+    })),
+  
+  setShowInChart: (serial, show) =>
+    set((state) => ({
+      perDevice: {
+        ...state.perDevice,
+        [serial]: {
+          ...(state.perDevice[serial] || defaultDeviceState),
+          showInChart: show,
+        },
+      },
+    })),
+  
+  setRtiaChannel: (serial, channel) =>
+    set((state) => ({
+      perDevice: {
+        ...state.perDevice,
+        [serial]: {
+          ...(state.perDevice[serial] || defaultDeviceState),
+          rtiaChannel: channel,
+        },
+      },
+    })),
+  
+  clearDeviceState: (serial) =>
+    set((state) => ({
+      perDevice: {
+        ...state.perDevice,
+        [serial]: { ...defaultDeviceState },
+      },
+    })),
+}));

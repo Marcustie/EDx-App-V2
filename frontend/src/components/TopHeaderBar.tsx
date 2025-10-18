@@ -1,6 +1,7 @@
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useTheme } from '@/hooks/useTheme';
 
 interface TopHeaderBarProps {
   onToggleSidebar: () => void;
@@ -8,6 +9,11 @@ interface TopHeaderBarProps {
 }
 
 export function TopHeaderBar({ onToggleSidebar, isConnected }: TopHeaderBarProps) {
+  const { theme } = useTheme();
+  const logoSrc = theme === 'dark' 
+    ? '/assets/electradx-logo-dark.png' 
+    : '/assets/electradx-logo-light.png';
+
   return (
     <div className="h-16 border-b border-border bg-card flex items-center justify-between px-4">
       {/* Left: Sidebar Toggle + Logo */}
@@ -20,7 +26,11 @@ export function TopHeaderBar({ onToggleSidebar, isConnected }: TopHeaderBarProps
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <div className="text-lg font-semibold">ElectraDx</div>
+        <img 
+          src={logoSrc} 
+          alt="ElectraDx" 
+          className="h-7"
+        />
       </div>
 
       {/* Right: Connection Indicator + Theme Toggle */}

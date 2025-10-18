@@ -4,8 +4,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { TopHeaderBar } from '@/components/TopHeaderBar';
 import { StatusBar } from '@/components/StatusBar';
 import { Dashboard } from '@/pages/Dashboard';
-import { Instruments } from '@/pages/Instruments';
-import { DeviceDetail } from '@/pages/DeviceDetail';
+import { InstrumentsNew } from '@/pages/InstrumentsNew';
 import { Scripts } from '@/pages/Scripts';
 import { Runs } from '@/pages/Runs';
 import { Analysis } from '@/pages/Analysis';
@@ -46,8 +45,7 @@ function App() {
           <div className="max-w-[1920px] mx-auto p-6">
             <Switch>
               <Route path="/" component={Dashboard} />
-              <Route path="/instruments" component={Instruments} />
-              <Route path="/instruments/:serial" component={DeviceDetail} />
+              <Route path="/instruments" component={InstrumentsNew} />
               <Route path="/scripts" component={Scripts} />
               <Route path="/runs" component={Runs} />
               <Route path="/analysis" component={Analysis} />
