@@ -55,13 +55,13 @@ export function Dashboard() {
           <p className="text-sm text-muted-foreground mt-1">System overview and device status</p>
         </div>
         <div className="flex gap-3">
-          <Button onClick={handleScan} disabled={loading} size="lg">
+          <Button onClick={handleScan} disabled={loading} size="lg" className="relative z-10">
             <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Scan Devices
           </Button>
           <Link 
             href="/instruments"
-            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8 relative z-10"
           >
             View All Instruments
           </Link>

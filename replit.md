@@ -30,7 +30,8 @@ EDx Lab Platform is a modern web-based laboratory data platform for controlling 
 - Tailwind CSS (styling)
 - Recharts (data visualization)
 - Lucide React (icons)
-- Inter font (UI typography)
+- Zustand (state management)
+- Outfit font (global UI typography)
 - JetBrains Mono (monospace for device IDs, code, data)
 
 ### System Architecture
@@ -63,23 +64,34 @@ Frontend (React) ←→ Backend (FastAPI) ←→ XP2 Devices (USB)
 │   ├── src/
 │   │   ├── components/          # React components
 │   │   │   ├── ui/             # shadcn/ui base components
+│   │   │   ├── InstrumentTab.tsx    # Tabbed instrument UI
+│   │   │   ├── MetadataBox.tsx      # Tag editor
+│   │   │   ├── PotentiostatChart.tsx # Chronoamperometry chart
 │   │   │   ├── DeviceCard.tsx
-│   │   │   ├── DataChart.tsx
 │   │   │   ├── ScriptEditor.tsx
 │   │   │   └── ThemeToggle.tsx
 │   │   ├── pages/
 │   │   │   ├── Dashboard.tsx
-│   │   │   ├── Instruments.tsx
-│   │   │   ├── DeviceDetail.tsx
-│   │   │   └── Scripts.tsx
+│   │   │   ├── InstrumentsNew.tsx   # Tabbed workspace
+│   │   │   ├── Scripts.tsx
+│   │   │   ├── Runs.tsx
+│   │   │   ├── Analysis.tsx
+│   │   │   ├── LabGuru.tsx
+│   │   │   └── AuditLog.tsx
 │   │   ├── hooks/
 │   │   │   ├── useWebSocket.ts
 │   │   │   └── useTheme.ts
+│   │   ├── store/
+│   │   │   └── appStore.ts      # Zustand state management
 │   │   ├── services/
 │   │   │   └── api.ts           # Backend API client
 │   │   ├── types/
 │   │   │   └── index.ts         # TypeScript interfaces
 │   │   └── App.tsx
+│   ├── public/
+│   │   └── assets/
+│   │       ├── electradx-logo-light.png
+│   │       └── electradx-logo-dark.png
 │   ├── package.json
 │   └── vite.config.ts
 └── replit.md
