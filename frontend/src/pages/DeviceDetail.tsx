@@ -107,9 +107,6 @@ export function DeviceDetail() {
   const processedCountRef = useRef<number>(0);
 
   // Buffer and capture window for decoded-script fallback
-  const decodedBufferRef = useRef<string[]>([]);
-  const captureUntilRef = useRef<number>(0);   // ms deadline; 0 = off
-  const CAPTURE_WINDOW_MS = 4000;              // collect for up to 4s after first plausible line
 
   const outputRef = useRef<string[]>([]); // keep output even though we removed the panel (useful for debugging)
 
@@ -165,6 +162,7 @@ export function DeviceDetail() {
 
         case 'script-position': {
           setCurrentLine(event.line);
+          localStorage.setItem(`current-line-${serialNumber}`, String(event.line));
           break;
         }
 
@@ -173,41 +171,9 @@ export function DeviceDetail() {
           const msg = (event.message ?? '').trim();
           if (isTransportNoise(msg)) break;
 
-          // keep a rolling output buffer internally (handy for debugging)
+          // Keep rolling output buffer for debugging
           const updated = [...outputRef.current, msg];
           outputRef.current = updated.length > MAX_OUTPUT_LINES ? updated.slice(-MAX_OUTPUT_LINES) : updated;
-
-          // Heuristic for decoded script lines
-          const looksLikeScript =
-            /[A-Za-z_]+\s*\(|[A-Za-z_]+:[A-Za-z_]+\(|print\(|time\.delay|motor\.|sensor\.|button\./.test(msg);
-
-          // Start/continue capture if not ready yet and we see decoded lines
-          const now = Date.now();
-          if (!scriptReady && looksLikeScript) {
-            if (captureUntilRef.current === 0 || now > captureUntilRef.current) {
-              decodedBufferRef.current = [];
-              captureUntilRef.current = now + CAPTURE_WINDOW_MS;
-            }
-            if (now <= captureUntilRef.current) {
-              decodedBufferRef.current.push(msg);
-              const combined = decodedBufferRef.current.join('\n');
-              setUploadedScript(combined);
-              lastScriptRef.current = combined;
-              localStorage.setItem(`uploaded-script-${serialNumber}`, combined);
-              localStorage.setItem(
-                `uploaded-script-lines-${serialNumber}`,
-                String(decodedBufferRef.current.length),
-              );
-
-              // Arm START after a few lines or end of window
-              if (decodedBufferRef.current.length >= 5 || now > captureUntilRef.current) {
-                localStorage.setItem(`uploaded-script-ready-${serialNumber}`, 'true');
-                setScriptReady(true);
-                setJustBecameReady(true);
-                window.setTimeout(() => setJustBecameReady(false), 1500);
-              }
-            }
-          }
           break;
         }
 
@@ -220,10 +186,6 @@ export function DeviceDetail() {
               ? incomingScript.split('\n').length
               : 0;
           const incomingReady: boolean = event.ready === true || incomingLines >= 5; // fallback rule
-
-          // If it's a different script text than we held, grey out START first
-          const scriptChanged = lastScriptRef.current !== incomingScript;
-          if (scriptChanged) setScriptReady(false);
 
           if (incomingScript) {
             setUploadedScript(incomingScript);
@@ -281,6 +243,7 @@ export function DeviceDetail() {
       outputRef.current = [];
       await api.runScript(serialNumber);
       setIsRunning(true);
+      localStorage.setItem(`is-running-${serialNumber}`, 'true');
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to run script:', error);
@@ -300,6 +263,7 @@ export function DeviceDetail() {
       }
     } finally {
       setIsRunning(false);
+      localStorage.setItem(`is-running-${serialNumber}`, 'false');
       setCurrentLine(undefined);
     }
   };

@@ -62,3 +62,22 @@ Thumbs.db
 
 # Windows device-file artifact
 nul
+
+# Bytecode / caches
+__pycache__/
+*.pyc
+
+# Frontend build/cache
+frontend/.vite/
+frontend/dist/
+
+# IDE / tooling
+.vscode/
+.idea/
+*.log
+*.tmp
+.DS_Store
+
+# Local LLM/tooling
+.claude/
+frontend/.claude/

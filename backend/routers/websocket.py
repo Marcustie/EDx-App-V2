@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 import asyncio
 import re
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -104,11 +104,10 @@ async def device_websocket(websocket: WebSocket, serial_number: str):
     try:
         # Keep connection alive and handle incoming messages
         while True:
-            data = await websocket.receive_text()
-            # Could handle client -> device commands here if needed
-            log.debug(f'Received from client: {data}')
+            await asyncio.sleep(1)  # Keep connection alive
     except WebSocketDisconnect:
-        device_connections[serial_number].remove(websocket)
+        if websocket in device_connections[serial_number]:
+            device_connections[serial_number].remove(websocket)
         log.info(f'WebSocket disconnected for device {serial_number}')
         if not device_connections[serial_number]:
             del device_connections[serial_number]
@@ -121,7 +120,7 @@ async def broadcast_to_device(serial_number: str, event: dict):
     message = json.dumps(event)
     disconnected = set()
     
-    for websocket in device_connections[serial_number]:
+    for websocket in list(device_connections[serial_number]):
         try:
             await websocket.send_text(message)
         except Exception as e:

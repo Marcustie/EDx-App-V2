@@ -20,6 +20,7 @@ export function useWebSocket(serialNumber: string | null) {
     };
     
     ws.onmessage = (event) => {
+      console.log('?? RAW WS MESSAGE:', event.data);
       try {
         const data = JSON.parse(event.data);
         setEvents((prev) => [...prev, data]);

@@ -217,6 +217,8 @@ async def upload_script(serial_number: str, request: ScriptUploadRequest) -> Dic
 
         # Prefer decoded script for clients; keep event 'type' stable
         from routers.websocket import broadcast_to_device
+        # Small delay to ensure WebSocket is connected
+        await asyncio.sleep(0.1)
         await broadcast_to_device(
             serial_number,
             {
